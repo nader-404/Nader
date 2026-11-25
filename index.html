@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مبارزة الكونغ فو</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#17152b;color:white;font-family:Arial,sans-serif;text-align:center}
+h1{margin:12px}
+button{border:0;border-radius:12px;padding:12px;background:#ffd166;color:#24172b;font-weight:bold;font-size:15px;touch-action:manipulation}
+.top{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px}
+#mode{background:#9bf6ff}
+canvas{width:96%;max-width:960px;aspect-ratio:16/9;border:3px solid #ffd166;border-radius:14px;display:block;margin:auto;touch-action:none}
+.hud{display:flex;justify-content:space-around;direction:ltr;margin:10px}
+.panel{width:43%}
+.bar{height:16px;background:#44344a;border:2px solid white;border-radius:20px;overflow:hidden}
+.fill{height:100%;width:100%;background:#65e572}
+.energy{height:10px;background:#44344a;border-radius:10px;margin-top:5px;overflow:hidden}
+.energy div{height:100%;width:0;background:#44e5ff}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px}
+.pad{background:#292442;padding:8px;border-radius:12px}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.keys button{padding:12px 2px;font-size:13px}
+#message{font-size:19px;font-weight:bold;margin:8px}
+@media(max-width:500px){.keys button{font-size:11px;padding:10px 1px}}
+</style>
+</head>
+<body>
+<h1>🥋 مبارزة الكونغ فو</h1>
+<div class="top">
+<button id="mode">الوضع: ضد الكمبيوتر</button>
+<button id="new">جولة جديدة</button>
+</div>
+<div class="hud">
+<div class="panel">
+<b>المقاتل الأول</b>
+<div class="bar"><div class="fill" id="hp1"></div></div>
+<div class="energy"><div id="en1"></div></div>
+</div>
+<div class="panel">
+<b>المقاتل الثاني</b>
+<div class="bar"><div class="fill" id="hp2"></div></div>
+<div class="energy"><div id="en2"></div></div>
+</div>
+</div>
+<canvas id="game" width="960" height="540"></canvas>
+<div id="message">الجولة 1 — استعد!</div>
+<div class="controls">
+<div class="pad">
+<b>المقاتل الأول</b>
+<div class="keys">
+<button data-p="1" data-a="left">◀</button>
+<button data-p="1" data-a="jump">قفز</button>
+<button data-p="1" data-a="right">▶</button>
+<button data-p="1" data-a="block">صد</button>
+<button data-p="1" data-a="punch">لكمة</button>
+<button data-p="1" data-a="kick">ركلة</button>
+<button data-p="1" data-a="special">خاصة</button>
+</div>
+</div>
+<div class="pad">
+<b>المقاتل الثاني</b>
+<div class="keys">
+<button data-p="2" data-a="left">◀</button>
+<button data-p="2" data-a="jump">قفز</button>
+<button data-p="2" data-a="right">▶</button>
+<button data-p="2" data-a="block">صد</button>
+<button data-p="2" data-a="punch">لكمة</button>
+<button data-p="2" data-a="kick">ركلة</button>
+<button data-p="2" data-a="special">خاصة</button>
+</div>
+</div>
+</div>
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const hp1=document.getElementById("hp1");
+const hp2=document.getElementById("hp2");
+const en1=document.getElementById("en1");
+const en2=document.getElementById("en2");
+const message=document.getElementById("message");
+let twoPlayers=false;
+let round=1,wins1=0,wins2=0;
+let ended=false,last=0;
+let keys={};
+let held={1:{},2:{}};
+let a,b;
+const floor=435;
+function sound(freq,duration=.12){
+ try{
+  const ac=new (window.AudioContext||window.webkitAudioContext)();
+  const osc=ac.createOscillator();
+  const gain=ac.createGain();
+  osc.connect(gain);gain.connect(ac.destination);
+  osc.frequency.value=freq;
+  gain.gain.setValueAtTime(.12,ac.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration);
+  osc.start();osc.stop(ac.currentTime+duration);
+  osc.onended=()=>ac.close();
+ }catch(e){}
+}
+function fighter(x,color,dir){
+ return {
+  x,y:floor,vx:0,vy:0,hp:100,energy:0,
+  color,dir,ground:true,block:false,
+  act:"idle",timer:0,cool:0,hit:false,stun:0
+ };
+}
+function resetRound(){
+ a=fighter(300,"#17121d",1);
+ b=fighter(660,"#080b18",-1);
+ ended=false;
+ updateHud();
+ message.textContent="الجولة "+round+" — ابدأ القتال!";
+}
+function newMatch(){
+ round=1;wins1=0;wins2=0;
+ resetRound();
+}
+resetRound();
+document.getElementById("new").onclick=newMatch;
+document.getElementById("mode").onclick=()=>{
+ twoPlayers=!twoPlayers;
+ document.getElementById("mode").textContent=
+ twoPlayers?"الوضع: لاعبان":"الوضع: ضد الكمبيوتر";
+ newMatch();
+};
+function updateHud(){
+ hp1.style.width=a.hp+"%";
+ hp2.style.width=b.hp+"%";
+ en1.style.width=a.energy+"%";
+ en2.style.width=b.energy+"%";
+}
+function action(p,act){
+ if(ended)return;
+ if(act==="block"){
+  p.block=true;
+  return;
+ }
+ if(act==="jump"&&p.ground){
+  p.vy=-13;p.ground=false;
+  sound(500);
+  return;
+ }
+ if(act==="special"){
+  if(p.energy>=100&&p.cool<=0){
+   p.energy=0;
+   p.act="special";p.timer=30;p.cool=55;p.hit=false;
+   sound(65,.4);
+  }
+  return;
+ }
+ if((act==="punch"||act==="kick")&&p.cool<=0&&p.stun<=0){
+  p.act=act;
+  p.timer=act==="kick"?25:18;
+  p.cool=act==="kick"?38:27;
+  p.hit=false;
+  sound(act==="kick"?90:140);
+ }
+}
+function release(p,act){
+ if(act==="block")p.block=false;
+}
+document.querySelectorAll("[data-a]").forEach(btn=>{
+ const n=Number(btn.dataset.p),act=btn.dataset.a;
+ const down=e=>{
+  e.preventDefault();
+  held[n][act]=true;
+  if(act!=="left"&&act!=="right")action(n===1?a:b,act);
+ };
+ const up=e=>{
+  e.preventDefault();
+  held[n][act]=false;
+  if(act==="block")release(n===1?a:b,act);
+ };
+ btn.addEventListener("pointerdown",down);
+ ["pointerup","pointercancel","pointerleave"].forEach(ev=>btn.addEventListener(ev,up));
+});
+const map={
+ KeyA:[1,"left"],KeyD:[1,"right"],KeyW:[1,"jump"],
+ KeyS:[1,"block"],KeyF:[1,"punch"],KeyG:[1,"kick"],KeyH:[1,"special"],
+ ArrowLeft:[2,"left"],ArrowRight:[2,"right"],ArrowUp:[2,"jump"],
+ ArrowDown:[2,"block"],KeyJ:[2,"punch"],KeyK:[2,"kick"],KeyL:[2,"special"]
+};
+window.addEventListener("keydown",e=>{
+ if(!map[e.code])return;
+ e.preventDefault();
+ let [n,act]=map[e.code];
+ if(!keys[e.code]){
+  keys[e.code]=true;
+  action(n===1?a:b,act);
+ }
+});
+window.addEventListener("keyup",e=>{
+ if(!map[e.code])return;
+ let [n,act]=map[e.code];
+ keys[e.code]=false;
+ if(act==="block")release(n===1?a:b,act);
+});
+function move(p,n,dt){
+ let left=held[n].left||keys[n===1?"KeyA":"ArrowLeft"];
+ let right=held[n].right||keys[n===1?"KeyD":"ArrowRight"];
+ if(p.stun>0){
+  p.stun-=dt/16.67;
+  p.vx*=.88;
+ }else{
+  if(left&&!right)p.vx=-4.2;
+  else if(right&&!left)p.vx=4.2;
+  else p.vx*=.72;
+ }
+ p.x+=p.vx*dt/16.67;
+ p.vy+=.62*dt/16.67;
+ p.y+=p.vy*dt/16.67;
+ if(p.y>=floor){
+  p.y=floor;p.vy=0;p.ground=true;
+ }
+ p.x=Math.max(55,Math.min(905,p.x));
+ if(p.cool>0)p.cool-=dt/16.67;
+ if(p.timer>0)p.timer-=dt/16.67;
+ else if(p.act!=="idle")p.act="idle";
+}
+function combat(p,q){
+ if(p.act==="idle"||p.hit||p.timer<7)return;
+ let dist=Math.abs(p.x-q.x);
+ let reach=p.act==="special"?175:p.act==="kick"?105:83;
+ if(dist<reach&&Math.abs(p.y-q.y)<100){
+  let damage=p.act==="special"?28:p.act==="kick"?14:10;
+  if(q.block)damage*=.18;
+  q.hp=Math.max(0,q.hp-damage);
+  q.stun=q.block?0:7;
+  q.vx=(q.x>p.x?1:-1)*(q.block?1.5:5);
+  p.energy=Math.min(100,p.energy+20);
+  p.hit=true;
+  sound(p.act==="special"?55:p.act==="kick"?85:130);
+  updateHud();
+ }
+}
+function finishRound(){
+ ended=true;
+ if(a.hp<=0)wins2++;
+ else wins1++;
+ if(wins1>=2||wins2>=2){
+  message.textContent=wins1>=2?
+  "🏆 فاز المقاتل الأول بالبطولة!":
+  "🏆 فاز المقاتل الثاني بالبطولة!";
+  round=1;wins1=0;wins2=0;
+  setTimeout(()=>{
+   if(confirm("هل تريد بدء بطولة جديدة؟"))newMatch();
+  },300);
+ }else{
+  message.textContent="فاز "+(a.hp>0?"المقاتل الأول":"المقاتل الثاني")+
+  " بالجولة! النتيجة "+wins1+" - "+wins2;
+  setTimeout(()=>{
+   round++;
+   resetRound();
+  },1800);
+ }
+}
+function background(){
+ let g=ctx.createLinearGradient(0,0,0,540);
+ g.addColorStop(0,"#49376f");
+ g.addColorStop(.48,"#ed795e");
+ g.addColorStop(1,"#ffbd73");
+ ctx.fillStyle=g;ctx.fillRect(0,0,960,540);
+ ctx.fillStyle="#ffd56a";
+ ctx.beginPath();ctx.arc(480,205,105,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#f6a18a";
+ [120,280,650,820].forEach(x=>{
+  ctx.beginPath();
+  ctx.ellipse(x,145,58,13,0,0,Math.PI*2);
+  ctx.ellipse(x+30,140,34,12,0,0,Math.PI*2);
+  ctx.fill();
+ });
+ ctx.fillStyle="#8b5570";
+ ctx.beginPath();
+ ctx.moveTo(0,365);ctx.lineTo(150,225);
+ ctx.lineTo(270,360);ctx.lineTo(420,240);
+ ctx.lineTo(610,370);ctx.lineTo(790,230);
+ ctx.lineTo(960,365);ctx.lineTo(960,450);
+ ctx.lineTo(0,450);ctx.fill();
+ ctx.fillStyle="#543b59";
+ ctx.beginPath();
+ ctx.moveTo(0,405);ctx.lineTo(180,300);
+ ctx.lineTo(330,410);ctx.lineTo(530,295);
+ ctx.lineTo(720,410);ctx.lineTo(850,315);
+ ctx.lineTo(960,390);ctx.lineTo(960,460);
+ ctx.lineTo(0,460);ctx.fill();
+ ctx.fillStyle="#382d3d";
+ ctx.fillRect(0,435,960,105);
+ ctx.fillStyle="#e7a06e";
+ ctx.fillRect(0,435,960,3);
+}
+function drawFighter(p,second){
+ ctx.save();
+ ctx.translate(p.x,p.y);
+ ctx.scale(p.dir,1);
+ ctx.fillStyle="#241b2b66";
+ ctx.beginPath();ctx.ellipse(0,2,39,8,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle=p.color;
+ ctx.lineWidth=15;ctx.lineCap="round";
+ ctx.beginPath();
+ ctx.moveTo(-4,-45);ctx.lineTo(-20,-14);ctx.lineTo(-36,-3);
+ ctx.stroke();
+ ctx.beginPath();
+ ctx.moveTo(5,-45);ctx.lineTo(23,-20);ctx.lineTo(38,-5);
+ ctx.stroke();
+ ctx.fillStyle=p.color;
+ ctx.beginPath();
+ ctx.moveTo(-17,-94);ctx.lineTo(15,-94);
+ ctx.lineTo(22,-47);ctx.lineTo(-18,-42);
+ ctx.closePath();ctx.fill();
+ ctx.beginPath();ctx.arc(0,-111,17,0,Math.PI*2);ctx.fill();
+ if(second){
+  ctx.strokeStyle="#f5d76e";ctx.lineWidth=6;
+  ctx.beginPath();
+  ctx.moveTo(-15,-120);
+  ctx.quadraticCurveTo(-2,-130,16,-119);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(13,-120);
+  ctx.quadraticCurveTo(28,-116,25+Math.sin(performance.now()/110)*7,-103);
+  ctx.stroke();
+ }
+ ctx.strokeStyle=p.color;ctx.lineWidth=13;
+ ctx.beginPath();
+ ctx.moveTo(-12,-86);
+ ctx.lineTo(p.act==="punch"&&p.timer>0?48:-31,-68);
+ ctx.stroke();
+ ctx.beginPath();
+ ctx.moveTo(12,-86);
+ ctx.lineTo(p.block?34:27,p.block?-108:-65);
+ ctx.stroke();
+ if(p.act==="kick"&&p.timer>7){
+  ctx.lineWidth=14;
+  ctx.beginPath();ctx.moveTo(8,-47);ctx.lineTo(67,-62);ctx.stroke();
+ }
+ if(p.act==="special"&&p.timer>5){
+  ctx.fillStyle="#50eaff";
+  ctx.beginPath();ctx.arc(65,-80,25,0,Math.PI*2);ctx.fill();
+ }
+ if(p.block){
+  ctx.strokeStyle="#ffd166";ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(14,-86,38,-.9,.9);ctx.stroke();
+ }
+ ctx.restore();
+}
+function frame(t){
+ let dt=Math.min(32,t-last||16);
+ last=t;
+ background();
+ if(!ended){
+  move(a,1,dt);
+  if(twoPlayers){
+   move(b,2,dt);
+  }else{
+   let d=a.x-b.x;
+   held[2].left=d< -115;
+   held[2].right=d>115;
+   if(Math.abs(d)<105&&b.cool<=0&&Math.random()<.035)
+    action(b,Math.random()<.55?"punch":"kick");
+   if(Math.abs(d)<100&&Math.random()<.015)b.block=true;
+   else if(Math.random()<.04)b.block=false;
+   move(b,2,dt);
+  }
+  a.dir=a.x<b.x?1:-1;
+  b.dir=-a.dir;
+  combat(a,b);
+  combat(b,a);
+  if(a.hp<=0||b.hp<=0)finishRound();
+ }
+ drawFighter(a,false);
+ drawFighter(b,true);
+ requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
