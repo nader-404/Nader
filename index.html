@@ -3,483 +3,323 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Kung Fu Legends</title>
+<title>مبارزة الكونغ فو</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#17152b;color:white;font-family:Arial;text-align:center}
-h1{margin:12px 0;color:#ffd166}
-button,select{border:0;border-radius:10px;padding:11px;background:#ffd166;color:#24172b;font-weight:bold;font-size:14px}
-button:active{transform:scale(.95)}
-.top{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px}
-select{background:#fff}
-canvas{width:96%;max-width:960px;aspect-ratio:16/9;border:3px solid #ffd166;border-radius:14px;display:block;margin:auto;touch-action:none}
-.hud{display:flex;justify-content:space-around;direction:ltr;margin:10px}
-.panel{width:43%}
-.bar{height:16px;background:#44344a;border:2px solid white;border-radius:20px;overflow:hidden}
-.fill{height:100%;background:#65e572;width:100%;transition:width .12s}
-.energy{height:9px;background:#44344a;border-radius:10px;margin-top:5px;overflow:hidden}
-.energy div{height:100%;background:#42eaff;width:0%}
-.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px auto;max-width:500px}
-.controls button{min-height:48px}
-#message{font-weight:bold;font-size:18px;margin:8px}
-#round{color:#ffd166}
-@media(max-width:500px){.controls{gap:5px;margin:8px}.controls button{font-size:12px;padding:8px 2px}}
+body{margin:0;background:#171329;color:white;font-family:Arial,sans-serif;text-align:center}
+h1{font-size:30px;margin:15px}
+button,select{border:0;border-radius:13px;padding:13px;background:#ffd36b;color:#251a24;font-weight:bold;font-size:16px;cursor:pointer;touch-action:none}
+.top{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px}
+.hud{display:flex;justify-content:space-around;gap:15px;margin:12px}
+.status{width:44%;font-weight:bold}
+.bar{height:17px;background:#44344b;border:2px solid white;border-radius:20px;overflow:hidden;margin-top:7px}
+.fill{height:100%;background:#53e47b;width:100%;transition:width .15s}
+.energy{background:#20d9f2}
+canvas{display:block;width:96%;max-width:1000px;margin:auto;border:4px solid #ffd36b;border-radius:20px;touch-action:none}
+#message{font-size:23px;font-weight:bold;margin:12px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;max-width:800px;margin:auto}
+.pad{background:#211c3b;border-radius:18px;padding:12px}
+.pad h3{margin:5px}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.keys button{min-height:53px}
+.special{grid-column:3}
+@media(max-width:450px){h1{font-size:24px}.keys button{font-size:14px;padding:10px 4px}.controls{gap:6px;padding:7px}.pad{padding:7px}}
 </style>
 </head>
 <body>
-<h1>🥋 KUNG FU LEGENDS</h1>
+<h1>🥋 مبارزة الكونغ فو</h1>
 <div class="top">
-<select id="difficulty">
-<option value="easy">بوت سهل</option>
-<option value="normal" selected>بوت متوسط</option>
-<option value="hard">بوت صعب</option>
-<option value="legend">بوت أسطوري</option>
-</select>
 <button id="restart">جولة جديدة</button>
+<select id="difficulty" aria-label="مستوى الكمبيوتر">
+<option value="0.65">سهل</option>
+<option value="1">متوسط</option>
+<option value="1.35">صعب</option>
+<option value="1.7">أسطوري</option>
+</select>
 </div>
 <div class="hud">
-<div class="panel">
-<b>أنت</b>
-<div class="bar"><div class="fill" id="hp1"></div></div>
-<div class="energy"><div id="en1"></div></div>
+<div class="status">المقاتل الأول
+<div class="bar"><div id="hp1" class="fill"></div></div>
+<div class="bar"><div id="en1" class="fill energy"></div></div>
 </div>
-<div class="panel">
-<b>البوت</b>
-<div class="bar"><div class="fill" id="hp2"></div></div>
-<div class="energy"><div id="en2"></div></div>
+<div class="status">المقاتل الثاني
+<div class="bar"><div id="hp2" class="fill"></div></div>
+<div class="bar"><div id="en2" class="fill energy"></div></div>
 </div>
 </div>
-<canvas id="game" width="960" height="540"></canvas>
-<div id="round">الجولة 1 | أنت 0 - 0 البوت</div>
-<div id="message">استعد للقتال!</div>
+<canvas id="game" width="960" height="520"></canvas>
+<div id="message">ابدأ القتال!</div>
 <div class="controls">
-<button data-act="left">◀ يسار</button>
-<button data-act="jump">قفز ⬆</button>
-<button data-act="right">يمين ▶</button>
-<button data-act="block">🛡 صد</button>
-<button data-act="punch">👊 لكمة</button>
-<button data-act="kick">🦵 ركلة</button>
-<button data-act="special" style="grid-column:1/4;background:#50eaff">⚡ حركة خاصة</button>
+<div class="pad">
+<h3>المقاتل الأول</h3>
+<div class="keys">
+<button data-key="right">▶</button>
+<button data-key="jump">قفز</button>
+<button data-key="left">◀</button>
+<button data-key="kick">ركلة</button>
+<button data-key="punch">لكمة</button>
+<button data-key="block">صد</button>
+<button class="special" data-key="special">خاصة ⚡</button>
+</div>
+</div>
+<div class="pad">
+<h3>المقاتل الثاني (تحكم تجريبي)</h3>
+<div class="keys">
+<button data-key="bright">▶</button>
+<button data-key="bjump">قفز</button>
+<button data-key="bleft">◀</button>
+<button data-key="bkick">ركلة</button>
+<button data-key="bpunch">لكمة</button>
+<button data-key="bblock">صد</button>
+<button class="special" data-key="bspecial">خاصة ⚡</button>
+</div>
+</div>
 </div>
 <script>
 (()=>{
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
-const hp1=document.getElementById("hp1");
-const hp2=document.getElementById("hp2");
-const en1=document.getElementById("en1");
-const en2=document.getElementById("en2");
-const message=document.getElementById("message");
-const roundText=document.getElementById("round");
-const difficulty=document.getElementById("difficulty");
-const W=960,H=540,FLOOR=435;
-let player,bot;
-let keys={},held={};
-let winsPlayer=0,winsBot=0,round=1;
-let finished=false,last=0,shake=0;
-let particles=[];
-let soundContext=null;
-function sound(freq,duration=.12){
+const W=960,H=520;
+const keys={};
+let last=0,round=1,finished=false,roundTimer=0;
+let difficulty=1;
+function fighter(x,color,player){
+ return {x,y:400,vx:0,vy:0,ground:400,health:100,energy:100,
+ color,player,face:player?1:-1,action:"idle",time:0,
+ block:false,hit:0,walk:0,attackCooldown:0,stun:0};
+}
+let p=fighter(300,"#171421",true);
+let b=fighter(660,"#eee7dc",false);
+function reset(){
+ p=fighter(300,"#171421",true);
+ b=fighter(660,"#eee7dc",false);
+ finished=false;
+ document.getElementById("message").textContent="الجولة "+round+" — ابدأ القتال!";
+}
+document.getElementById("restart").onclick=()=>{round=1;reset()};
+document.getElementById("difficulty").onchange=e=>{
+ difficulty=+e.target.value;
+};
+function press(k,on){
+ keys[k]=on;
+}
+document.querySelectorAll("[data-key]").forEach(btn=>{
+ const k=btn.dataset.key;
+ btn.addEventListener("pointerdown",e=>{e.preventDefault();press(k,true)});
+ ["pointerup","pointercancel","pointerleave"].forEach(ev=>
+ btn.addEventListener(ev,()=>press(k,false)));
+});
+document.addEventListener("keydown",e=>{
+ const map={a:"left",d:"right",w:"jump",f:"punch",g:"kick",s:"block",h:"special"};
+ if(map[e.key.toLowerCase()]){e.preventDefault();press(map[e.key.toLowerCase()],true)}
+});
+document.addEventListener("keyup",e=>{
+ const map={a:"left",d:"right",w:"jump",f:"punch",g:"kick",s:"block",h:"special"};
+ if(map[e.key.toLowerCase()])press(map[e.key.toLowerCase()],false);
+});
+function action(f,name){
+ if(f.attackCooldown>0||f.stun>0||finished)return;
+ if(name==="special"&&f.energy<35)return;
+ if(name==="special")f.energy-=35;
+ f.action=name;f.time=0;f.attackCooldown=name==="special"?.75:.48;
+}
+function control(f,p1,opponent,dt){
+ f.time+=dt;
+ f.attackCooldown=Math.max(0,f.attackCooldown-dt);
+ f.stun=Math.max(0,f.stun-dt);
+ f.hit=Math.max(0,f.hit-dt);
+ f.face=opponent.x>f.x?1:-1;
+ if(f.stun>0){f.vx*=.88;return}
+ const prefix=p1?"":"b";
+ let left=keys[prefix+"left"],right=keys[prefix+"right"];
+ let jump=keys[prefix+"jump"];
+ let block=keys[prefix+"block"];
+ if(p1){
+  left=keys.left;right=keys.right;jump=keys.jump;block=keys.block;
+ }
+ if(left){f.vx-=950*dt;f.walk+=dt*10}
+ if(right){f.vx+=950*dt;f.walk+=dt*10}
+ f.vx*=Math.pow(.001,dt);
+ f.vx=Math.max(-260,Math.min(260,f.vx));
+ f.x+=f.vx*dt;
+ f.x=Math.max(60,Math.min(900,f.x));
+ if(jump&&f.y>=f.ground-1){f.vy=-510}
+ if(f.y<f.ground||f.vy<0){
+  f.vy+=1250*dt;f.y+=f.vy*dt;
+  if(f.y>=f.ground){f.y=f.ground;f.vy=0}
+ }
+ f.block=!!block;
+ if(p1){
+  if(keys.punch)action(f,"punch");
+  if(keys.kick)action(f,"kick");
+  if(keys.special)action(f,"special");
+ }else{
+  const distance=Math.abs(opponent.x-f.x);
+  if(distance>135)f.vx+=Math.sign(opponent.x-f.x)*90*difficulty*dt;
+  else if(distance<85)f.vx-=Math.sign(opponent.x-f.x)*65*dt;
+  if(Math.random()<dt*(.75*difficulty)&&distance<155)
+   action(f,Math.random()<.5?"punch":"kick");
+  f.block=Math.random()<.18*difficulty;
+ }
+}
+function hitTest(a,b){
+ if(a.action!=="punch"&&a.action!=="kick"&&a.action!=="special")return;
+ let duration=a.action==="special"?.48:.3;
+ if(a.time>duration)return;
+ if(a.didHit)return;
+ if(Math.abs(a.x-b.x)<125&&Math.abs(a.y-b.y)<100){
+  a.didHit=true;
+  if(!b.block){
+   b.health=Math.max(0,b.health-(a.action==="special"?22:a.action==="kick"?13:9));
+   b.stun=.18;
+   b.vx=b.face*180;
+   b.hit=.2;
+   a.energy=Math.min(100,a.energy+12);
+   sound(110);
+  }else{
+   b.energy=Math.max(0,b.energy-8);
+   sound(190);
+  }
+ }
+ if(a.time>duration+.1)a.didHit=false;
+}
+function sound(freq){
  try{
-  if(!soundContext)soundContext=new(window.AudioContext||window.webkitAudioContext)();
-  if(soundContext.state==="suspended")soundContext.resume();
-  const o=soundContext.createOscillator();
-  const g=soundContext.createGain();
-  o.connect(g);g.connect(soundContext.destination);
-  o.frequency.value=freq;
-  g.gain.setValueAtTime(.12,soundContext.currentTime);
-  g.gain.exponentialRampToValueAtTime(.001,soundContext.currentTime+duration);
-  o.start();o.stop(soundContext.currentTime+duration);
+  const ac=new(window.AudioContext||window.webkitAudioContext)();
+  const o=ac.createOscillator(),g=ac.createGain();
+  o.frequency.value=freq;g.gain.value=.07;
+  o.connect(g);g.connect(ac.destination);
+  o.start();g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.12);
+  o.stop(ac.currentTime+.13);
  }catch(e){}
 }
-function makeFighter(x,color,dir){
- return{
-  x,y:FLOOR,vx:0,vy:0,hp:100,energy:0,
-  color,dir,ground:true,block:false,
-  act:"idle",timer:0,cool:0,hit:false,
-  stun:0,walk:0,aiTimer:0
- };
-}
-function resetRound(){
- player=makeFighter(280,"#111019",1);
- bot=makeFighter(680,"#080b18",-1);
- finished=false;
- particles=[];
- updateHud();
- message.textContent="ابدأ القتال!";
-}
-function newMatch(){
- winsPlayer=0;winsBot=0;round=1;
- resetRound();
- updateRound();
-}
-function updateRound(){
- roundText.textContent=
- "الجولة "+round+" | أنت "+winsPlayer+" - "+winsBot+" البوت";
-}
-function updateHud(){
- hp1.style.width=player.hp+"%";
- hp2.style.width=bot.hp+"%";
- en1.style.width=player.energy+"%";
- en2.style.width=bot.energy+"%";
-}
-document.getElementById("restart").onclick=newMatch;
-function action(p,act){
- if(finished||p.stun>0)return;
- if(act==="block"){
-  p.block=true;
-  return;
+function background(){
+ const sky=ctx.createLinearGradient(0,0,0,520);
+ sky.addColorStop(0,"#32204f");sky.addColorStop(.5,"#ff805b");sky.addColorStop(1,"#ffc16c");
+ ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+ ctx.fillStyle="#ffe16d";ctx.beginPath();ctx.arc(480,205,105,0,Math.PI*2);ctx.fill();
+ for(let i=0;i<5;i++){
+  let x=i*240-70;
+  ctx.fillStyle=i%2?"#704b77":"#59446f";
+  ctx.beginPath();ctx.moveTo(x,390);ctx.lineTo(x+125,230+(i%2)*35);ctx.lineTo(x+270,390);ctx.fill();
  }
- if(act==="jump"&&p.ground){
-  p.vy=-13;
-  p.ground=false;
-  sound(480);
-  return;
- }
- if(act==="special"){
-  if(p.energy>=100&&p.cool<=0){
-   p.energy=0;
-   p.act="special";
-   p.timer=30;
-   p.cool=55;
-   p.hit=false;
-   sound(65,.35);
-   for(let i=0;i<12;i++)
-    particles.push({x:p.x,y:p.y-80,vx:(Math.random()-.5)*9,vy:(Math.random()-.5)*9,life:25});
-  }
-  return;
- }
- if((act==="punch"||act==="kick")&&p.cool<=0){
-  p.act=act;
-  p.timer=act==="kick"?24:17;
-  p.cool=act==="kick"?34:24;
-  p.hit=false;
-  sound(act==="kick"?90:140);
+ ctx.fillStyle="#4b344f";ctx.fillRect(0,410,W,110);
+ ctx.strokeStyle="#eeb477";ctx.lineWidth=3;
+ ctx.beginPath();ctx.moveTo(0,410);ctx.lineTo(W,410);ctx.stroke();
+ for(let i=0;i<12;i++){
+  ctx.strokeStyle="rgba(255,200,130,.17)";
+  ctx.beginPath();ctx.moveTo(i*90,440);ctx.lineTo(i*90+30,520);ctx.stroke();
  }
 }
-function release(p,act){
- if(act==="block")p.block=false;
+function line(x1,y1,x2,y2,width,color){
+ ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap="round";
+ ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
 }
-document.querySelectorAll("[data-act]").forEach(btn=>{
- const act=btn.dataset.act;
- btn.addEventListener("pointerdown",e=>{
-  e.preventDefault();
-  held[act]=true;
-  if(act!=="left"&&act!=="right")action(player,act);
- });
- const up=e=>{
-  e.preventDefault();
-  held[act]=false;
-  release(player,act);
- };
- btn.addEventListener("pointerup",up);
- btn.addEventListener("pointercancel",up);
- btn.addEventListener("pointerleave",up);
-});
-const keyMap={
- KeyA:"left",KeyD:"right",KeyW:"jump",
- KeyS:"block",KeyF:"punch",KeyG:"kick",KeyH:"special"
-};
-window.addEventListener("keydown",e=>{
- const act=keyMap[e.code];
- if(!act)return;
- e.preventDefault();
- if(!keys[e.code]){
-  keys[e.code]=true;
-  action(player,act);
+function drawFighter(f){
+ const t=f.time;
+ const active=f.action!=="idle"&&t<(f.action==="special"?.75:.55);
+ let swing=active?Math.sin(Math.min(1,t/.3)*Math.PI):0;
+ let walk=Math.sin(f.walk)*Math.min(1,Math.abs(f.vx)/100);
+ let lean=f.hit?-.2:0;
+ let crouch=f.block?12:0;
+ let x=f.x,y=f.y;
+ let face=f.face;
+ let skin="#c88b65";
+ let cloth=f.color;
+ ctx.save();ctx.translate(x,y);ctx.scale(face,1);
+ // shadow
+ ctx.fillStyle="rgba(15,10,30,.35)";
+ ctx.beginPath();ctx.ellipse(0,3,49,9,0,0,7);ctx.fill();
+ // legs
+ let legSwing=walk*18;
+ line(-9,-65, -15+legSwing,-32,17,cloth);
+ line(-15+legSwing,-32,-20+legSwing,-4,13,cloth);
+ line(10,-65,15-legSwing,-33,17,cloth);
+ line(15-legSwing,-33,20-legSwing,-4,13,cloth);
+ line(-20+legSwing,-4,-3+legSwing,-2,11,cloth);
+ line(20-legSwing,-4,38-legSwing,-2,11,cloth);
+ // body
+ ctx.save();ctx.rotate(lean+Math.sin(t*3)*.025);
+ ctx.fillStyle=cloth;
+ ctx.beginPath();ctx.moveTo(-23,-135);ctx.lineTo(23,-135);
+ ctx.lineTo(30,-70);ctx.lineTo(0,-58);ctx.lineTo(-30,-70);ctx.closePath();ctx.fill();
+ // gi collar
+ ctx.strokeStyle=f.player?"#a94a36":"#777";
+ ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-10,-132);ctx.lineTo(0,-102);ctx.lineTo(13,-133);ctx.stroke();
+ ctx.fillStyle="#c23e36";ctx.fillRect(-22,-76,44,7);
+ // arms
+ let punch= f.action==="punch"||f.action==="special";
+ let kick=f.action==="kick";
+ let armX=punch?75*swing: kick?25:28;
+ let armY=punch?-112:-105;
+ line(-19,-125,-35,-103,13,cloth);
+ line(-35,-103,-28,-85,12,skin);
+ line(19,-125,armX,armY,14,cloth);
+ line(armX,armY,armX+(punch?20:10),armY+5,12,skin);
+ // fists
+ ctx.fillStyle=skin;ctx.beginPath();ctx.arc(armX+(punch?20:10),armY+5,9,0,7);ctx.fill();
+ // head
+ ctx.fillStyle=skin;ctx.beginPath();ctx.arc(0,-153,18,0,7);ctx.fill();
+ ctx.fillStyle="#17131d";ctx.beginPath();ctx.arc(0,-161,19,Math.PI,Math.PI*2);ctx.fill();
+ ctx.fillRect(-17,-161,34,8);
+ ctx.fillStyle="white";ctx.fillRect(5,-155,5,3);
+ if(f.player){
+  ctx.fillStyle="#d53d38";ctx.fillRect(-19,-170,35,5);
  }
-});
-window.addEventListener("keyup",e=>{
- const act=keyMap[e.code];
- if(!act)return;
- keys[e.code]=false;
- release(player,act);
-});
-function move(p,dt){
- const left=held.left||keys.KeyA;
- const right=held.right||keys.KeyD;
- if(p.stun>0){
-  p.stun-=dt/16.67;
-  p.vx*=.88;
- }else{
-  let target=left&&!right?-4.5:right&&!left?4.5:0;
-  p.vx+=(target-p.vx)*.23;
+ if(f.block){
+  line(22,-125,42,-155,13,cloth);
+  line(42,-155,34,-170,12,skin);
  }
- p.x+=p.vx*dt/16.67;
- p.y+=p.vy*dt/16.67;
- p.vy+=.58*dt/16.67;
- if(p.y>=FLOOR){
-  p.y=FLOOR;
-  p.vy=0;
-  p.ground=true;
+ if(kick){
+  line(10,-67,65*swing,-40,16,cloth);
+  line(65*swing,-40,90*swing,-37,12,skin);
  }
- p.x=Math.max(55,Math.min(905,p.x));
- if(p.cool>0)p.cool-=dt/16.67;
- if(p.timer>0)p.timer-=dt/16.67;
- else if(p.act!=="idle")p.act="idle";
- p.walk+=Math.abs(p.vx)*.07;
+ if(f.action==="special"&&t<.5){
+  ctx.strokeStyle="#39eaff";ctx.lineWidth=7;
+  ctx.beginPath();ctx.arc(35,-95,35,0,Math.PI*2);ctx.stroke();
+ }
+ ctx.restore();
+ ctx.restore();
 }
-function botAI(dt){
- if(finished)return;
- const level=difficulty.value;
- const dist=player.x-bot.x;
- const abs=Math.abs(dist);
- bot.dir=dist>0?1:-1;
- let speed=2.5;
- let reaction=.045;
- let attackRange=95;
- if(level==="easy"){speed=1.9;reaction=.012;attackRange=75}
- if(level==="normal"){speed=2.7;reaction=.035;attackRange=95}
- if(level==="hard"){speed=3.5;reaction=.075;attackRange=115}
- if(level==="legend"){speed=4.2;reaction=.12;attackRange=130}
- if(bot.stun>0)return;
- if(abs>attackRange+20){
-  bot.vx+=((dist>0?speed:-speed)-bot.vx)*.12;
- }else if(abs<55){
-  bot.vx+=(dist>0?-speed:speed)*.09;
- }else{
-  bot.vx*=.75;
- }
- bot.x+=bot.vx*dt/16.67;
- bot.x=Math.max(55,Math.min(905,bot.x));
- bot.aiTimer-=dt/16.67;
- if(bot.aiTimer<=0){
-  bot.aiTimer=level==="easy"?65:level==="normal"?40:level==="hard"?25:15;
-  if(abs<attackRange+25){
-   if(level!=="easy"&&Math.random()<reaction*.8){
-    bot.block=true;
-    setTimeout(()=>bot.block=false,450);
-   }else if(bot.cool<=0){
-    let r=Math.random();
-    if(level==="legend"&&bot.energy>=100&&r<.35)action(bot,"special");
-    else if(r<.55)action(bot,"punch");
-    else action(bot,"kick");
-   }
-  }
-  if(level!=="easy"&&player.act!=="idle"&&abs<130&&Math.random()<reaction*2)
-   bot.block=true;
-  else if(Math.random()<.5)bot.block=false;
-  if(level!=="easy"&&Math.random()<reaction)
-   action(bot,"jump");
- }
+function updateUI(){
+ document.getElementById("hp1").style.width=p.health+"%";
+ document.getElementById("hp2").style.width=b.health+"%";
+ document.getElementById("en1").style.width=p.energy+"%";
+ document.getElementById("en2").style.width=b.energy+"%";
 }
-function hit(attacker,defender){
- if(attacker.act==="idle"||attacker.hit||attacker.timer<6)return;
- const dist=Math.abs(attacker.x-defender.x);
- const reach=attacker.act==="special"?180:
- attacker.act==="kick"?110:85;
- if(dist>reach||Math.abs(attacker.y-defender.y)>100)return;
- let damage=attacker.act==="special"?27:
- attacker.act==="kick"?14:10;
- if(defender.block)damage*=.18;
- defender.hp=Math.max(0,defender.hp-damage);
- defender.stun=defender.block?0:7;
- defender.vx=(defender.x>attacker.x?1:-1)*(defender.block?1.5:5);
- attacker.energy=Math.min(100,attacker.energy+20);
- attacker.hit=true;
- shake=attacker.act==="special"?10:5;
- sound(attacker.act==="special"?55:attacker.act==="kick"?85:125);
- for(let i=0;i<8;i++){
-  particles.push({
-   x:defender.x,y:defender.y-75,
-   vx:(Math.random()-.5)*8,
-   vy:(Math.random()-.5)*8,
-   life:18
-  });
- }
- updateHud();
-}
-function finishRound(){
+function finish(){
  if(finished)return;
  finished=true;
- if(player.hp<=0)winsBot++;
- else winsPlayer++;
- if(winsPlayer>=2||winsBot>=2){
-  message.textContent=winsPlayer>=2?
-   "🏆 فزت بالبطولة!":
-   "🤖 البوت فاز بالبطولة!";
-  roundText.textContent="النتيجة النهائية "+winsPlayer+" - "+winsBot;
-  return;
- }
- message.textContent=player.hp>0?
-  "فزت بالجولة!":
-  "البوت فاز بالجولة!";
- updateRound();
- setTimeout(()=>{
-  round++;
-  resetRound();
-  updateRound();
- },1800);
+ let winner=p.health<=0?"الكمبيوتر فاز!":"أنت فزت بالجولة!";
+ document.getElementById("message").textContent=winner;
+ roundTimer=2.2;
 }
-function background(){
- let g=ctx.createLinearGradient(0,0,0,H);
- g.addColorStop(0,"#49376f");
- g.addColorStop(.5,"#ed795e");
- g.addColorStop(1,"#ffbd73");
- ctx.fillStyle=g;
- ctx.fillRect(0,0,W,H);
- ctx.fillStyle="#ffd56a";
- ctx.beginPath();
- ctx.arc(480,205,105,0,Math.PI*2);
- ctx.fill();
- ctx.fillStyle="#f6a18a";
- [120,280,650,820].forEach(x=>{
-  ctx.beginPath();
-  ctx.ellipse(x,145,58,13,0,0,Math.PI*2);
-  ctx.ellipse(x+30,140,34,12,0,0,Math.PI*2);
-  ctx.fill();
- });
- ctx.fillStyle="#8b5570";
- ctx.beginPath();
- ctx.moveTo(0,365);
- ctx.lineTo(150,225);
- ctx.lineTo(270,360);
- ctx.lineTo(420,240);
- ctx.lineTo(610,370);
- ctx.lineTo(790,230);
- ctx.lineTo(960,365);
- ctx.lineTo(960,450);
- ctx.lineTo(0,450);
- ctx.fill();
- ctx.fillStyle="#543b59";
- ctx.beginPath();
- ctx.moveTo(0,405);
- ctx.lineTo(180,300);
- ctx.lineTo(330,410);
- ctx.lineTo(530,295);
- ctx.lineTo(720,410);
- ctx.lineTo(850,315);
- ctx.lineTo(960,390);
- ctx.lineTo(960,460);
- ctx.lineTo(0,460);
- ctx.fill();
- ctx.fillStyle="#382d3d";
- ctx.fillRect(0,435,960,105);
- ctx.fillStyle="#e7a06e";
- ctx.fillRect(0,435,960,3);
-}
-function drawFighter(p,isBot){
- ctx.save();
- ctx.translate(p.x,p.y);
- ctx.scale(p.dir,1);
- const bob=p.ground?Math.sin(p.walk)*2:0;
- ctx.translate(0,bob);
- ctx.fillStyle="#241b2b66";
- ctx.beginPath();
- ctx.ellipse(0,2,40,8,0,0,Math.PI*2);
- ctx.fill();
- ctx.strokeStyle=p.color;
- ctx.lineWidth=15;
- ctx.lineCap="round";
- const moving=Math.abs(p.vx)>1;
- const legSwing=moving?Math.sin(p.walk)*12:0;
- ctx.beginPath();
- ctx.moveTo(-4,-45);
- ctx.lineTo(-20-legSwing,-14);
- ctx.lineTo(-36-legSwing,-3);
- ctx.stroke();
- ctx.beginPath();
- ctx.moveTo(5,-45);
- ctx.lineTo(23+legSwing,-20);
- ctx.lineTo(38+legSwing,-5);
- ctx.stroke();
- ctx.fillStyle=p.color;
- ctx.beginPath();
- ctx.moveTo(-17,-94);
- ctx.lineTo(15,-94);
- ctx.lineTo(22,-47);
- ctx.lineTo(-18,-42);
- ctx.closePath();
- ctx.fill();
- ctx.beginPath();
- ctx.arc(0,-111,17,0,Math.PI*2);
- ctx.fill();
- if(isBot){
-  ctx.strokeStyle="#ffd166";
-  ctx.lineWidth=6;
-  ctx.beginPath();
-  ctx.moveTo(-15,-120);
-  ctx.quadraticCurveTo(0,-130,16,-119);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(13,-120);
-  ctx.lineTo(29,-105+Math.sin(performance.now()/110)*7);
-  ctx.stroke();
- }
- ctx.strokeStyle=p.color;
- ctx.lineWidth=13;
- const punching=p.act==="punch"&&p.timer>0;
- ctx.beginPath();
- ctx.moveTo(-12,-86);
- ctx.lineTo(punching?55:-31,punching?-82:-68);
- ctx.stroke();
- ctx.beginPath();
- ctx.moveTo(12,-86);
- ctx.lineTo(p.block?35:27,p.block?-108:-65);
- ctx.stroke();
- if(p.act==="kick"&&p.timer>5){
-  ctx.lineWidth=15;
-  ctx.beginPath();
-  ctx.moveTo(8,-47);
-  ctx.lineTo(70,-65);
-  ctx.stroke();
- }
- if(p.act==="special"&&p.timer>5){
-  ctx.fillStyle="#50eaff";
-  ctx.beginPath();
-  ctx.arc(68,-82,26,0,Math.PI*2);
-  ctx.fill();
- }
- if(p.block){
-  ctx.strokeStyle="#ffd166";
-  ctx.lineWidth=3;
-  ctx.beginPath();
-  ctx.arc(14,-86,38,-.9,.9);
-  ctx.stroke();
- }
- ctx.restore();
-}
-function drawParticles(dt){
- for(let i=particles.length-1;i>=0;i--){
-  let p=particles[i];
-  p.x+=p.vx;
-  p.y+=p.vy;
-  p.life-=dt/16.67;
-  ctx.globalAlpha=Math.max(0,p.life/20);
-  ctx.fillStyle="#ffe07a";
-  ctx.beginPath();
-  ctx.arc(p.x,p.y,4,0,Math.PI*2);
-  ctx.fill();
-  ctx.globalAlpha=1;
-  if(p.life<=0)particles.splice(i,1);
- }
-}
-function frame(t){
- let dt=Math.min(32,t-last||16);
- last=t;
+function loop(now){
+ let dt=Math.min((now-last)/1000||0,.032);last=now;
  background();
  if(!finished){
-  move(player,dt);
-  botAI(dt);
-  player.dir=player.x<bot.x?1:-1;
-  bot.dir=-player.dir;
-  hit(player,bot);
-  hit(bot,player);
-  if(player.hp<=0||bot.hp<=0)finishRound();
+  control(p,true,b,dt);
+  control(b,false,p,dt);
+  p.energy=Math.min(100,p.energy+5*dt);
+  b.energy=Math.min(100,b.energy+5*dt);
+  hitTest(p,b);hitTest(b,p);
+  if(p.health<=0||b.health<=0)finish();
  }
- ctx.save();
- if(shake>0){
-  ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
-  shake*=.8;
+ drawFighter(p);drawFighter(b);
+ updateUI();
+ if(finished){
+  roundTimer-=dt;
+  if(roundTimer<=0){
+   if(p.health<=0||b.health<=0){
+    round++;
+    if(round>3){round=1}
+   }
+   reset();
+  }
  }
- drawFighter(player,false);
- drawFighter(bot,true);
- drawParticles(dt);
- ctx.restore();
- requestAnimationFrame(frame);
+ requestAnimationFrame(loop);
 }
-resetRound();
-requestAnimationFrame(frame);
+requestAnimationFrame(loop);
 })();
 </script>
 </body>
