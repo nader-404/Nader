@@ -2,77 +2,67 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>مبارزة الكونغ فو</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Kung Fu Legends</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#17152b;color:white;font-family:Arial,sans-serif;text-align:center}
-h1{margin:12px}
-button{border:0;border-radius:12px;padding:12px;background:#ffd166;color:#24172b;font-weight:bold;font-size:15px;touch-action:manipulation}
-.top{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px}
-#mode{background:#9bf6ff}
+body{margin:0;background:#17152b;color:white;font-family:Arial;text-align:center}
+h1{margin:12px 0;color:#ffd166}
+button,select{border:0;border-radius:10px;padding:11px;background:#ffd166;color:#24172b;font-weight:bold;font-size:14px}
+button:active{transform:scale(.95)}
+.top{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px}
+select{background:#fff}
 canvas{width:96%;max-width:960px;aspect-ratio:16/9;border:3px solid #ffd166;border-radius:14px;display:block;margin:auto;touch-action:none}
 .hud{display:flex;justify-content:space-around;direction:ltr;margin:10px}
 .panel{width:43%}
 .bar{height:16px;background:#44344a;border:2px solid white;border-radius:20px;overflow:hidden}
-.fill{height:100%;width:100%;background:#65e572}
-.energy{height:10px;background:#44344a;border-radius:10px;margin-top:5px;overflow:hidden}
-.energy div{height:100%;width:0;background:#44e5ff}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px}
-.pad{background:#292442;padding:8px;border-radius:12px}
-.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.keys button{padding:12px 2px;font-size:13px}
-#message{font-size:19px;font-weight:bold;margin:8px}
-@media(max-width:500px){.keys button{font-size:11px;padding:10px 1px}}
+.fill{height:100%;background:#65e572;width:100%;transition:width .12s}
+.energy{height:9px;background:#44344a;border-radius:10px;margin-top:5px;overflow:hidden}
+.energy div{height:100%;background:#42eaff;width:0%}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px auto;max-width:500px}
+.controls button{min-height:48px}
+#message{font-weight:bold;font-size:18px;margin:8px}
+#round{color:#ffd166}
+@media(max-width:500px){.controls{gap:5px;margin:8px}.controls button{font-size:12px;padding:8px 2px}}
 </style>
 </head>
 <body>
-<h1>🥋 مبارزة الكونغ فو</h1>
+<h1>🥋 KUNG FU LEGENDS</h1>
 <div class="top">
-<button id="mode">الوضع: ضد الكمبيوتر</button>
-<button id="new">جولة جديدة</button>
+<select id="difficulty">
+<option value="easy">بوت سهل</option>
+<option value="normal" selected>بوت متوسط</option>
+<option value="hard">بوت صعب</option>
+<option value="legend">بوت أسطوري</option>
+</select>
+<button id="restart">جولة جديدة</button>
 </div>
 <div class="hud">
 <div class="panel">
-<b>المقاتل الأول</b>
+<b>أنت</b>
 <div class="bar"><div class="fill" id="hp1"></div></div>
 <div class="energy"><div id="en1"></div></div>
 </div>
 <div class="panel">
-<b>المقاتل الثاني</b>
+<b>البوت</b>
 <div class="bar"><div class="fill" id="hp2"></div></div>
 <div class="energy"><div id="en2"></div></div>
 </div>
 </div>
 <canvas id="game" width="960" height="540"></canvas>
-<div id="message">الجولة 1 — استعد!</div>
+<div id="round">الجولة 1 | أنت 0 - 0 البوت</div>
+<div id="message">استعد للقتال!</div>
 <div class="controls">
-<div class="pad">
-<b>المقاتل الأول</b>
-<div class="keys">
-<button data-p="1" data-a="left">◀</button>
-<button data-p="1" data-a="jump">قفز</button>
-<button data-p="1" data-a="right">▶</button>
-<button data-p="1" data-a="block">صد</button>
-<button data-p="1" data-a="punch">لكمة</button>
-<button data-p="1" data-a="kick">ركلة</button>
-<button data-p="1" data-a="special">خاصة</button>
-</div>
-</div>
-<div class="pad">
-<b>المقاتل الثاني</b>
-<div class="keys">
-<button data-p="2" data-a="left">◀</button>
-<button data-p="2" data-a="jump">قفز</button>
-<button data-p="2" data-a="right">▶</button>
-<button data-p="2" data-a="block">صد</button>
-<button data-p="2" data-a="punch">لكمة</button>
-<button data-p="2" data-a="kick">ركلة</button>
-<button data-p="2" data-a="special">خاصة</button>
-</div>
-</div>
+<button data-act="left">◀ يسار</button>
+<button data-act="jump">قفز ⬆</button>
+<button data-act="right">يمين ▶</button>
+<button data-act="block">🛡 صد</button>
+<button data-act="punch">👊 لكمة</button>
+<button data-act="kick">🦵 ركلة</button>
+<button data-act="special" style="grid-column:1/4;background:#50eaff">⚡ حركة خاصة</button>
 </div>
 <script>
+(()=>{
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 const hp1=document.getElementById("hp1");
@@ -80,81 +70,89 @@ const hp2=document.getElementById("hp2");
 const en1=document.getElementById("en1");
 const en2=document.getElementById("en2");
 const message=document.getElementById("message");
-let twoPlayers=false;
-let round=1,wins1=0,wins2=0;
-let ended=false,last=0;
-let keys={};
-let held={1:{},2:{}};
-let a,b;
-const floor=435;
+const roundText=document.getElementById("round");
+const difficulty=document.getElementById("difficulty");
+const W=960,H=540,FLOOR=435;
+let player,bot;
+let keys={},held={};
+let winsPlayer=0,winsBot=0,round=1;
+let finished=false,last=0,shake=0;
+let particles=[];
+let soundContext=null;
 function sound(freq,duration=.12){
  try{
-  const ac=new (window.AudioContext||window.webkitAudioContext)();
-  const osc=ac.createOscillator();
-  const gain=ac.createGain();
-  osc.connect(gain);gain.connect(ac.destination);
-  osc.frequency.value=freq;
-  gain.gain.setValueAtTime(.12,ac.currentTime);
-  gain.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration);
-  osc.start();osc.stop(ac.currentTime+duration);
-  osc.onended=()=>ac.close();
+  if(!soundContext)soundContext=new(window.AudioContext||window.webkitAudioContext)();
+  if(soundContext.state==="suspended")soundContext.resume();
+  const o=soundContext.createOscillator();
+  const g=soundContext.createGain();
+  o.connect(g);g.connect(soundContext.destination);
+  o.frequency.value=freq;
+  g.gain.setValueAtTime(.12,soundContext.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,soundContext.currentTime+duration);
+  o.start();o.stop(soundContext.currentTime+duration);
  }catch(e){}
 }
-function fighter(x,color,dir){
- return {
-  x,y:floor,vx:0,vy:0,hp:100,energy:0,
+function makeFighter(x,color,dir){
+ return{
+  x,y:FLOOR,vx:0,vy:0,hp:100,energy:0,
   color,dir,ground:true,block:false,
-  act:"idle",timer:0,cool:0,hit:false,stun:0
+  act:"idle",timer:0,cool:0,hit:false,
+  stun:0,walk:0,aiTimer:0
  };
 }
 function resetRound(){
- a=fighter(300,"#17121d",1);
- b=fighter(660,"#080b18",-1);
- ended=false;
+ player=makeFighter(280,"#111019",1);
+ bot=makeFighter(680,"#080b18",-1);
+ finished=false;
+ particles=[];
  updateHud();
- message.textContent="الجولة "+round+" — ابدأ القتال!";
+ message.textContent="ابدأ القتال!";
 }
 function newMatch(){
- round=1;wins1=0;wins2=0;
+ winsPlayer=0;winsBot=0;round=1;
  resetRound();
+ updateRound();
 }
-resetRound();
-document.getElementById("new").onclick=newMatch;
-document.getElementById("mode").onclick=()=>{
- twoPlayers=!twoPlayers;
- document.getElementById("mode").textContent=
- twoPlayers?"الوضع: لاعبان":"الوضع: ضد الكمبيوتر";
- newMatch();
-};
+function updateRound(){
+ roundText.textContent=
+ "الجولة "+round+" | أنت "+winsPlayer+" - "+winsBot+" البوت";
+}
 function updateHud(){
- hp1.style.width=a.hp+"%";
- hp2.style.width=b.hp+"%";
- en1.style.width=a.energy+"%";
- en2.style.width=b.energy+"%";
+ hp1.style.width=player.hp+"%";
+ hp2.style.width=bot.hp+"%";
+ en1.style.width=player.energy+"%";
+ en2.style.width=bot.energy+"%";
 }
+document.getElementById("restart").onclick=newMatch;
 function action(p,act){
- if(ended)return;
+ if(finished||p.stun>0)return;
  if(act==="block"){
   p.block=true;
   return;
  }
  if(act==="jump"&&p.ground){
-  p.vy=-13;p.ground=false;
-  sound(500);
+  p.vy=-13;
+  p.ground=false;
+  sound(480);
   return;
  }
  if(act==="special"){
   if(p.energy>=100&&p.cool<=0){
    p.energy=0;
-   p.act="special";p.timer=30;p.cool=55;p.hit=false;
-   sound(65,.4);
+   p.act="special";
+   p.timer=30;
+   p.cool=55;
+   p.hit=false;
+   sound(65,.35);
+   for(let i=0;i<12;i++)
+    particles.push({x:p.x,y:p.y-80,vx:(Math.random()-.5)*9,vy:(Math.random()-.5)*9,life:25});
   }
   return;
  }
- if((act==="punch"||act==="kick")&&p.cool<=0&&p.stun<=0){
+ if((act==="punch"||act==="kick")&&p.cool<=0){
   p.act=act;
-  p.timer=act==="kick"?25:18;
-  p.cool=act==="kick"?38:27;
+  p.timer=act==="kick"?24:17;
+  p.cool=act==="kick"?34:24;
   p.hit=false;
   sound(act==="kick"?90:140);
  }
@@ -162,109 +160,168 @@ function action(p,act){
 function release(p,act){
  if(act==="block")p.block=false;
 }
-document.querySelectorAll("[data-a]").forEach(btn=>{
- const n=Number(btn.dataset.p),act=btn.dataset.a;
- const down=e=>{
+document.querySelectorAll("[data-act]").forEach(btn=>{
+ const act=btn.dataset.act;
+ btn.addEventListener("pointerdown",e=>{
   e.preventDefault();
-  held[n][act]=true;
-  if(act!=="left"&&act!=="right")action(n===1?a:b,act);
- };
+  held[act]=true;
+  if(act!=="left"&&act!=="right")action(player,act);
+ });
  const up=e=>{
   e.preventDefault();
-  held[n][act]=false;
-  if(act==="block")release(n===1?a:b,act);
+  held[act]=false;
+  release(player,act);
  };
- btn.addEventListener("pointerdown",down);
- ["pointerup","pointercancel","pointerleave"].forEach(ev=>btn.addEventListener(ev,up));
+ btn.addEventListener("pointerup",up);
+ btn.addEventListener("pointercancel",up);
+ btn.addEventListener("pointerleave",up);
 });
-const map={
- KeyA:[1,"left"],KeyD:[1,"right"],KeyW:[1,"jump"],
- KeyS:[1,"block"],KeyF:[1,"punch"],KeyG:[1,"kick"],KeyH:[1,"special"],
- ArrowLeft:[2,"left"],ArrowRight:[2,"right"],ArrowUp:[2,"jump"],
- ArrowDown:[2,"block"],KeyJ:[2,"punch"],KeyK:[2,"kick"],KeyL:[2,"special"]
+const keyMap={
+ KeyA:"left",KeyD:"right",KeyW:"jump",
+ KeyS:"block",KeyF:"punch",KeyG:"kick",KeyH:"special"
 };
 window.addEventListener("keydown",e=>{
- if(!map[e.code])return;
+ const act=keyMap[e.code];
+ if(!act)return;
  e.preventDefault();
- let [n,act]=map[e.code];
  if(!keys[e.code]){
   keys[e.code]=true;
-  action(n===1?a:b,act);
+  action(player,act);
  }
 });
 window.addEventListener("keyup",e=>{
- if(!map[e.code])return;
- let [n,act]=map[e.code];
+ const act=keyMap[e.code];
+ if(!act)return;
  keys[e.code]=false;
- if(act==="block")release(n===1?a:b,act);
+ release(player,act);
 });
-function move(p,n,dt){
- let left=held[n].left||keys[n===1?"KeyA":"ArrowLeft"];
- let right=held[n].right||keys[n===1?"KeyD":"ArrowRight"];
+function move(p,dt){
+ const left=held.left||keys.KeyA;
+ const right=held.right||keys.KeyD;
  if(p.stun>0){
   p.stun-=dt/16.67;
   p.vx*=.88;
  }else{
-  if(left&&!right)p.vx=-4.2;
-  else if(right&&!left)p.vx=4.2;
-  else p.vx*=.72;
+  let target=left&&!right?-4.5:right&&!left?4.5:0;
+  p.vx+=(target-p.vx)*.23;
  }
  p.x+=p.vx*dt/16.67;
- p.vy+=.62*dt/16.67;
  p.y+=p.vy*dt/16.67;
- if(p.y>=floor){
-  p.y=floor;p.vy=0;p.ground=true;
+ p.vy+=.58*dt/16.67;
+ if(p.y>=FLOOR){
+  p.y=FLOOR;
+  p.vy=0;
+  p.ground=true;
  }
  p.x=Math.max(55,Math.min(905,p.x));
  if(p.cool>0)p.cool-=dt/16.67;
  if(p.timer>0)p.timer-=dt/16.67;
  else if(p.act!=="idle")p.act="idle";
+ p.walk+=Math.abs(p.vx)*.07;
 }
-function combat(p,q){
- if(p.act==="idle"||p.hit||p.timer<7)return;
- let dist=Math.abs(p.x-q.x);
- let reach=p.act==="special"?175:p.act==="kick"?105:83;
- if(dist<reach&&Math.abs(p.y-q.y)<100){
-  let damage=p.act==="special"?28:p.act==="kick"?14:10;
-  if(q.block)damage*=.18;
-  q.hp=Math.max(0,q.hp-damage);
-  q.stun=q.block?0:7;
-  q.vx=(q.x>p.x?1:-1)*(q.block?1.5:5);
-  p.energy=Math.min(100,p.energy+20);
-  p.hit=true;
-  sound(p.act==="special"?55:p.act==="kick"?85:130);
-  updateHud();
+function botAI(dt){
+ if(finished)return;
+ const level=difficulty.value;
+ const dist=player.x-bot.x;
+ const abs=Math.abs(dist);
+ bot.dir=dist>0?1:-1;
+ let speed=2.5;
+ let reaction=.045;
+ let attackRange=95;
+ if(level==="easy"){speed=1.9;reaction=.012;attackRange=75}
+ if(level==="normal"){speed=2.7;reaction=.035;attackRange=95}
+ if(level==="hard"){speed=3.5;reaction=.075;attackRange=115}
+ if(level==="legend"){speed=4.2;reaction=.12;attackRange=130}
+ if(bot.stun>0)return;
+ if(abs>attackRange+20){
+  bot.vx+=((dist>0?speed:-speed)-bot.vx)*.12;
+ }else if(abs<55){
+  bot.vx+=(dist>0?-speed:speed)*.09;
+ }else{
+  bot.vx*=.75;
  }
+ bot.x+=bot.vx*dt/16.67;
+ bot.x=Math.max(55,Math.min(905,bot.x));
+ bot.aiTimer-=dt/16.67;
+ if(bot.aiTimer<=0){
+  bot.aiTimer=level==="easy"?65:level==="normal"?40:level==="hard"?25:15;
+  if(abs<attackRange+25){
+   if(level!=="easy"&&Math.random()<reaction*.8){
+    bot.block=true;
+    setTimeout(()=>bot.block=false,450);
+   }else if(bot.cool<=0){
+    let r=Math.random();
+    if(level==="legend"&&bot.energy>=100&&r<.35)action(bot,"special");
+    else if(r<.55)action(bot,"punch");
+    else action(bot,"kick");
+   }
+  }
+  if(level!=="easy"&&player.act!=="idle"&&abs<130&&Math.random()<reaction*2)
+   bot.block=true;
+  else if(Math.random()<.5)bot.block=false;
+  if(level!=="easy"&&Math.random()<reaction)
+   action(bot,"jump");
+ }
+}
+function hit(attacker,defender){
+ if(attacker.act==="idle"||attacker.hit||attacker.timer<6)return;
+ const dist=Math.abs(attacker.x-defender.x);
+ const reach=attacker.act==="special"?180:
+ attacker.act==="kick"?110:85;
+ if(dist>reach||Math.abs(attacker.y-defender.y)>100)return;
+ let damage=attacker.act==="special"?27:
+ attacker.act==="kick"?14:10;
+ if(defender.block)damage*=.18;
+ defender.hp=Math.max(0,defender.hp-damage);
+ defender.stun=defender.block?0:7;
+ defender.vx=(defender.x>attacker.x?1:-1)*(defender.block?1.5:5);
+ attacker.energy=Math.min(100,attacker.energy+20);
+ attacker.hit=true;
+ shake=attacker.act==="special"?10:5;
+ sound(attacker.act==="special"?55:attacker.act==="kick"?85:125);
+ for(let i=0;i<8;i++){
+  particles.push({
+   x:defender.x,y:defender.y-75,
+   vx:(Math.random()-.5)*8,
+   vy:(Math.random()-.5)*8,
+   life:18
+  });
+ }
+ updateHud();
 }
 function finishRound(){
- ended=true;
- if(a.hp<=0)wins2++;
- else wins1++;
- if(wins1>=2||wins2>=2){
-  message.textContent=wins1>=2?
-  "🏆 فاز المقاتل الأول بالبطولة!":
-  "🏆 فاز المقاتل الثاني بالبطولة!";
-  round=1;wins1=0;wins2=0;
-  setTimeout(()=>{
-   if(confirm("هل تريد بدء بطولة جديدة؟"))newMatch();
-  },300);
- }else{
-  message.textContent="فاز "+(a.hp>0?"المقاتل الأول":"المقاتل الثاني")+
-  " بالجولة! النتيجة "+wins1+" - "+wins2;
-  setTimeout(()=>{
-   round++;
-   resetRound();
-  },1800);
+ if(finished)return;
+ finished=true;
+ if(player.hp<=0)winsBot++;
+ else winsPlayer++;
+ if(winsPlayer>=2||winsBot>=2){
+  message.textContent=winsPlayer>=2?
+   "🏆 فزت بالبطولة!":
+   "🤖 البوت فاز بالبطولة!";
+  roundText.textContent="النتيجة النهائية "+winsPlayer+" - "+winsBot;
+  return;
  }
+ message.textContent=player.hp>0?
+  "فزت بالجولة!":
+  "البوت فاز بالجولة!";
+ updateRound();
+ setTimeout(()=>{
+  round++;
+  resetRound();
+  updateRound();
+ },1800);
 }
 function background(){
- let g=ctx.createLinearGradient(0,0,0,540);
+ let g=ctx.createLinearGradient(0,0,0,H);
  g.addColorStop(0,"#49376f");
- g.addColorStop(.48,"#ed795e");
+ g.addColorStop(.5,"#ed795e");
  g.addColorStop(1,"#ffbd73");
- ctx.fillStyle=g;ctx.fillRect(0,0,960,540);
+ ctx.fillStyle=g;
+ ctx.fillRect(0,0,W,H);
  ctx.fillStyle="#ffd56a";
- ctx.beginPath();ctx.arc(480,205,105,0,Math.PI*2);ctx.fill();
+ ctx.beginPath();
+ ctx.arc(480,205,105,0,Math.PI*2);
+ ctx.fill();
  ctx.fillStyle="#f6a18a";
  [120,280,650,820].forEach(x=>{
   ctx.beginPath();
@@ -274,106 +331,156 @@ function background(){
  });
  ctx.fillStyle="#8b5570";
  ctx.beginPath();
- ctx.moveTo(0,365);ctx.lineTo(150,225);
- ctx.lineTo(270,360);ctx.lineTo(420,240);
- ctx.lineTo(610,370);ctx.lineTo(790,230);
- ctx.lineTo(960,365);ctx.lineTo(960,450);
- ctx.lineTo(0,450);ctx.fill();
+ ctx.moveTo(0,365);
+ ctx.lineTo(150,225);
+ ctx.lineTo(270,360);
+ ctx.lineTo(420,240);
+ ctx.lineTo(610,370);
+ ctx.lineTo(790,230);
+ ctx.lineTo(960,365);
+ ctx.lineTo(960,450);
+ ctx.lineTo(0,450);
+ ctx.fill();
  ctx.fillStyle="#543b59";
  ctx.beginPath();
- ctx.moveTo(0,405);ctx.lineTo(180,300);
- ctx.lineTo(330,410);ctx.lineTo(530,295);
- ctx.lineTo(720,410);ctx.lineTo(850,315);
- ctx.lineTo(960,390);ctx.lineTo(960,460);
- ctx.lineTo(0,460);ctx.fill();
+ ctx.moveTo(0,405);
+ ctx.lineTo(180,300);
+ ctx.lineTo(330,410);
+ ctx.lineTo(530,295);
+ ctx.lineTo(720,410);
+ ctx.lineTo(850,315);
+ ctx.lineTo(960,390);
+ ctx.lineTo(960,460);
+ ctx.lineTo(0,460);
+ ctx.fill();
  ctx.fillStyle="#382d3d";
  ctx.fillRect(0,435,960,105);
  ctx.fillStyle="#e7a06e";
  ctx.fillRect(0,435,960,3);
 }
-function drawFighter(p,second){
+function drawFighter(p,isBot){
  ctx.save();
  ctx.translate(p.x,p.y);
  ctx.scale(p.dir,1);
+ const bob=p.ground?Math.sin(p.walk)*2:0;
+ ctx.translate(0,bob);
  ctx.fillStyle="#241b2b66";
- ctx.beginPath();ctx.ellipse(0,2,39,8,0,0,Math.PI*2);ctx.fill();
- ctx.strokeStyle=p.color;
- ctx.lineWidth=15;ctx.lineCap="round";
  ctx.beginPath();
- ctx.moveTo(-4,-45);ctx.lineTo(-20,-14);ctx.lineTo(-36,-3);
+ ctx.ellipse(0,2,40,8,0,0,Math.PI*2);
+ ctx.fill();
+ ctx.strokeStyle=p.color;
+ ctx.lineWidth=15;
+ ctx.lineCap="round";
+ const moving=Math.abs(p.vx)>1;
+ const legSwing=moving?Math.sin(p.walk)*12:0;
+ ctx.beginPath();
+ ctx.moveTo(-4,-45);
+ ctx.lineTo(-20-legSwing,-14);
+ ctx.lineTo(-36-legSwing,-3);
  ctx.stroke();
  ctx.beginPath();
- ctx.moveTo(5,-45);ctx.lineTo(23,-20);ctx.lineTo(38,-5);
+ ctx.moveTo(5,-45);
+ ctx.lineTo(23+legSwing,-20);
+ ctx.lineTo(38+legSwing,-5);
  ctx.stroke();
  ctx.fillStyle=p.color;
  ctx.beginPath();
- ctx.moveTo(-17,-94);ctx.lineTo(15,-94);
- ctx.lineTo(22,-47);ctx.lineTo(-18,-42);
- ctx.closePath();ctx.fill();
- ctx.beginPath();ctx.arc(0,-111,17,0,Math.PI*2);ctx.fill();
- if(second){
-  ctx.strokeStyle="#f5d76e";ctx.lineWidth=6;
+ ctx.moveTo(-17,-94);
+ ctx.lineTo(15,-94);
+ ctx.lineTo(22,-47);
+ ctx.lineTo(-18,-42);
+ ctx.closePath();
+ ctx.fill();
+ ctx.beginPath();
+ ctx.arc(0,-111,17,0,Math.PI*2);
+ ctx.fill();
+ if(isBot){
+  ctx.strokeStyle="#ffd166";
+  ctx.lineWidth=6;
   ctx.beginPath();
   ctx.moveTo(-15,-120);
-  ctx.quadraticCurveTo(-2,-130,16,-119);
+  ctx.quadraticCurveTo(0,-130,16,-119);
   ctx.stroke();
   ctx.beginPath();
   ctx.moveTo(13,-120);
-  ctx.quadraticCurveTo(28,-116,25+Math.sin(performance.now()/110)*7,-103);
+  ctx.lineTo(29,-105+Math.sin(performance.now()/110)*7);
   ctx.stroke();
  }
- ctx.strokeStyle=p.color;ctx.lineWidth=13;
+ ctx.strokeStyle=p.color;
+ ctx.lineWidth=13;
+ const punching=p.act==="punch"&&p.timer>0;
  ctx.beginPath();
  ctx.moveTo(-12,-86);
- ctx.lineTo(p.act==="punch"&&p.timer>0?48:-31,-68);
+ ctx.lineTo(punching?55:-31,punching?-82:-68);
  ctx.stroke();
  ctx.beginPath();
  ctx.moveTo(12,-86);
- ctx.lineTo(p.block?34:27,p.block?-108:-65);
+ ctx.lineTo(p.block?35:27,p.block?-108:-65);
  ctx.stroke();
- if(p.act==="kick"&&p.timer>7){
-  ctx.lineWidth=14;
-  ctx.beginPath();ctx.moveTo(8,-47);ctx.lineTo(67,-62);ctx.stroke();
+ if(p.act==="kick"&&p.timer>5){
+  ctx.lineWidth=15;
+  ctx.beginPath();
+  ctx.moveTo(8,-47);
+  ctx.lineTo(70,-65);
+  ctx.stroke();
  }
  if(p.act==="special"&&p.timer>5){
   ctx.fillStyle="#50eaff";
-  ctx.beginPath();ctx.arc(65,-80,25,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();
+  ctx.arc(68,-82,26,0,Math.PI*2);
+  ctx.fill();
  }
  if(p.block){
-  ctx.strokeStyle="#ffd166";ctx.lineWidth=3;
-  ctx.beginPath();ctx.arc(14,-86,38,-.9,.9);ctx.stroke();
+  ctx.strokeStyle="#ffd166";
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.arc(14,-86,38,-.9,.9);
+  ctx.stroke();
  }
  ctx.restore();
+}
+function drawParticles(dt){
+ for(let i=particles.length-1;i>=0;i--){
+  let p=particles[i];
+  p.x+=p.vx;
+  p.y+=p.vy;
+  p.life-=dt/16.67;
+  ctx.globalAlpha=Math.max(0,p.life/20);
+  ctx.fillStyle="#ffe07a";
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,4,0,Math.PI*2);
+  ctx.fill();
+  ctx.globalAlpha=1;
+  if(p.life<=0)particles.splice(i,1);
+ }
 }
 function frame(t){
  let dt=Math.min(32,t-last||16);
  last=t;
  background();
- if(!ended){
-  move(a,1,dt);
-  if(twoPlayers){
-   move(b,2,dt);
-  }else{
-   let d=a.x-b.x;
-   held[2].left=d< -115;
-   held[2].right=d>115;
-   if(Math.abs(d)<105&&b.cool<=0&&Math.random()<.035)
-    action(b,Math.random()<.55?"punch":"kick");
-   if(Math.abs(d)<100&&Math.random()<.015)b.block=true;
-   else if(Math.random()<.04)b.block=false;
-   move(b,2,dt);
-  }
-  a.dir=a.x<b.x?1:-1;
-  b.dir=-a.dir;
-  combat(a,b);
-  combat(b,a);
-  if(a.hp<=0||b.hp<=0)finishRound();
+ if(!finished){
+  move(player,dt);
+  botAI(dt);
+  player.dir=player.x<bot.x?1:-1;
+  bot.dir=-player.dir;
+  hit(player,bot);
+  hit(bot,player);
+  if(player.hp<=0||bot.hp<=0)finishRound();
  }
- drawFighter(a,false);
- drawFighter(b,true);
+ ctx.save();
+ if(shake>0){
+  ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+  shake*=.8;
+ }
+ drawFighter(player,false);
+ drawFighter(bot,true);
+ drawParticles(dt);
+ ctx.restore();
  requestAnimationFrame(frame);
 }
+resetRound();
 requestAnimationFrame(frame);
+})();
 </script>
 </body>
 </html>
